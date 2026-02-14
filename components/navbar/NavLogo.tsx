@@ -37,8 +37,8 @@ const NavLogo: React.FC<NavLogoProps> = ({ isScrolled }) => {
           <Image
             src="/ncs-logo.svg" // <--- PLACE YOUR SVG FILE IN THE PUBLIC FOLDER
             alt="NCS Logo"
-            width={200}
-            height={200}
+            width={20}
+            height={20}
             className={`
               object-contain w-full h-full 
               transition-all duration-500 ease-out
