@@ -3,6 +3,7 @@ import Spline from "@splinetool/react-spline/next";
 import HeroSection from "@/components/sections/HeroSection";
 import IdentitySection from "@/components/sections/IdentitySection";
 import AboutSection from "@/components/sections/AboutSection";
+import PillarsSection from "@/components/sections/PillarsSection";
 
 const page = () => {
   return (
@@ -14,6 +15,7 @@ const page = () => {
       <HeroSection />
       <IdentitySection />
       <AboutSection />
+      <PillarsSection />
     </>
   );
 };
