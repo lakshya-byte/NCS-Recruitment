@@ -10,85 +10,71 @@ gsap.registerPlugin(ScrollTrigger);
 const CARD_DATA = [
   {
     title: "Build Real Systems",
-    description: "Work on real production-grade platforms.",
+    description:
+      "Work on production-grade platforms used by real users. Engineer systems that scale.",
   },
   {
     title: "Elite Engineering Culture",
-    description: "Collaborate with serious engineers.",
+    description:
+      "Collaborate with highly driven engineers obsessed with performance and quality.",
   },
   {
-    title: "Ship Cinematic Interfaces",
-    description: "Create Awwwards-level web experiences.",
+    title: "Create Cinematic Interfaces",
+    description:
+      "Build Awwwards-level interactive experiences using modern frontend technologies.",
   },
   {
     title: "Accelerate Your Growth",
-    description: "Become industry ready.",
+    description:
+      "Develop real-world engineering skills and become industry-ready.",
   },
 ];
 
 export default function WhyJoinNibble() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement[]>([]);
+  const cardRefs = useRef<HTMLDivElement[]>([]);
 
-  cardsRef.current = [];
+  cardRefs.current = [];
 
   const setCardRef = (el: HTMLDivElement | null) => {
-    if (el) cardsRef.current.push(el);
+    if (el) cardRefs.current.push(el);
   };
 
   useLayoutEffect(() => {
-    const section = sectionRef.current;
-    const pin = pinRef.current;
-    const cards = cardsRef.current;
+    const cards = cardRefs.current;
 
-    if (!section || !pin || cards.length === 0) return;
+    if (!cards.length) return;
 
-    const scrollDistance = window.innerHeight * (cards.length - 1);
+    const ctx = gsap.context(() => {
 
-    // CRITICAL: set section height equal to scroll distance
-    gsap.set(section, {
-      height: window.innerHeight + scrollDistance,
-    });
+      cards.forEach((card, index) => {
 
-    gsap.set(cards, {
-      yPercent: 120,
-      scale: 1,
-    });
+        const targetScale =
+          1 - (cards.length - index - 1) * 0.12; // aggressive cinematic scale
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: `+=${scrollDistance}`,
-        scrub: true,
-        pin: pin,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      },
-    });
-
-    cards.forEach((card, index) => {
-      tl.to(
-        card,
-        {
-          yPercent: 0,
-          ease: "none",
-        },
-        index
-      );
-
-      if (index > 0) {
-        tl.to(
-          cards.slice(0, index),
+        gsap.fromTo(
+          card,
           {
-            scale: 0.92 - index * 0.03,
-            ease: "none",
+            scale: 1,
           },
-          index
+          {
+            scale: targetScale,
+            ease: "none",
+            scrollTrigger: {
+              trigger: card,
+              start: "top center",
+              end: "bottom center",
+              scrub: true,
+            },
+          }
         );
-      }
-    });
+
+      });
+
+    }, sectionRef);
+
+    return () => ctx.revert();
+
   }, []);
 
   return (
@@ -96,23 +82,16 @@ export default function WhyJoinNibble() {
       ref={sectionRef}
       className="relative w-full bg-black"
     >
-      {/* sticky pin container */}
-      <div
-        ref={pinRef}
-        className="sticky top-0 h-screen flex items-center justify-center overflow-hidden"
-      >
-        <div className="relative w-full max-w-4xl h-[500px]">
-          {CARD_DATA.map((card, index) => (
-            <WhyJoinNibbleCard
-              key={index}
-              ref={setCardRef}
-              index={index}
-              title={card.title}
-              description={card.description}
-            />
-          ))}
-        </div>
-      </div>
+      {CARD_DATA.map((card, index) => (
+        <WhyJoinNibbleCard
+          key={index}
+          ref={setCardRef}
+          index={index}
+          total={CARD_DATA.length}
+          title={card.title}
+          description={card.description}
+        />
+      ))}
     </section>
   );
 }

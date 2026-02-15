@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
+import PreloaderProvider from "@/components/providers/PreloaderProvider";
+import Preloader from "@/components/preloader/Preloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,13 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <Navbar />
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <SmoothScrollProvider>
+          <PreloaderProvider>
+            <Preloader />
+
+            {children}
+          </PreloaderProvider>
+        </SmoothScrollProvider>
         <Footer />
       </body>
     </html>

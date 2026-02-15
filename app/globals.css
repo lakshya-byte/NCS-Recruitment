@@ -175,3 +175,8 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1000px;
+}

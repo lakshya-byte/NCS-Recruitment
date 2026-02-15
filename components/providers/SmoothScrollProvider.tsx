@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useRef } from "react";
 import Lenis from "lenis";
-import gsap from "gsap";
+import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,37 +13,119 @@ export default function SmoothScrollProvider({
   children: ReactNode;
 }) {
   const lenisRef = useRef<Lenis | null>(null);
+  const rafActiveRef = useRef(true);
 
   useEffect(() => {
+    /*
+    ========================================
+    Create Lenis instance with optimal settings
+    ========================================
+    */
+
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
+
       easing: (t: number) =>
-        Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        1 - Math.pow(1 - t, 3),
+
       smoothWheel: true,
-      touchMultiplier: 2,
+
+      smoothTouch: false,
+
+      wheelMultiplier: 0.9,
+
+      touchMultiplier: 1.5,
+
+      infinite: false,
     });
 
     lenisRef.current = lenis;
 
-    // CRITICAL: use ONLY GSAP ticker as RAF driver
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
+    /*
+    ========================================
+    GSAP ticker integration (NO duplicate RAF)
+    ========================================
+    */
+
+    const update = (time: number) => {
+      if (rafActiveRef.current) {
+        lenis.raf(time * 1000);
+      }
+    };
+
+    gsap.ticker.add(update);
 
     gsap.ticker.lagSmoothing(0);
 
-    // Sync ScrollTrigger
+    gsap.ticker.fps(60);
+
+    /*
+    ========================================
+    Sync ScrollTrigger with Lenis
+    ========================================
+    */
+
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Refresh ScrollTrigger after setup
+    /*
+    ========================================
+    Pause engine when tab inactive
+    HUGE performance gain
+    ========================================
+    */
+
+    const visibilityHandler = () => {
+      if (document.hidden) {
+        rafActiveRef.current = false;
+      } else {
+        rafActiveRef.current = true;
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      visibilityHandler
+    );
+
+    /*
+    ========================================
+    Optimize ScrollTrigger globally
+    ========================================
+    */
+
+    ScrollTrigger.config({
+      limitCallbacks: true,
+
+      ignoreMobileResize: true,
+
+      autoRefreshEvents:
+        "visibilitychange,DOMContentLoaded,load",
+    });
+
+    /*
+    ========================================
+    Refresh once after init
+    ========================================
+    */
+
     ScrollTrigger.refresh();
 
+    /*
+    ========================================
+    Cleanup
+    ========================================
+    */
+
     return () => {
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      gsap.ticker.remove(update);
+
+      document.removeEventListener(
+        "visibilitychange",
+        visibilityHandler
+      );
 
       lenis.destroy();
+
       ScrollTrigger.killAll();
     };
   }, []);
