@@ -1,15 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Text3D, Center } from '@react-three/drei';
-import * as THREE from 'three';
+import React from "react";
+import { Text3D, Center } from "@react-three/drei";
+import * as THREE from "three";
 
 export default function NCSText() {
   return (
-    <Center >
+    <Center   position={[0, 0.5, 0]}
+        cacheKey={JSON.stringify({ text: "NCS" })}>
       <Text3D
-        font="https://threejs.org/examples/fonts/helvetiker_bold.typeface.json"
-        size={1.8} // Slightly smaller to ensure it fits mobile screens
+        font="/fonts/helvetiker_bold.typeface.json"
+        size={3} // Slightly smaller to ensure it fits mobile screens
         height={0.5}
         curveSegments={32}
         bevelEnabled
@@ -23,7 +24,7 @@ export default function NCSText() {
         <meshStandardMaterial
           color="#ffffff"
           roughness={0.15} // Very shiny
-          metalness={0.9}  // Almost fully metallic
+          metalness={0.9} // Almost fully metallic
           envMapIntensity={1.5} // Boost reflections
         />
       </Text3D>

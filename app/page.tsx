@@ -2,6 +2,7 @@ import React from "react";
 import Spline from "@splinetool/react-spline/next";
 import HeroSection from "@/components/sections/HeroSection";
 import IdentitySection from "@/components/sections/IdentitySection";
+import AboutSection from "@/components/sections/AboutSection";
 
 const page = () => {
   return (
@@ -12,6 +13,7 @@ const page = () => {
       /> */}
       <HeroSection />
       <IdentitySection />
+      <AboutSection />
     </>
   );
 };
