@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+////////////////////
+// ENUMS
+////////////////////
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Domain {
+  PROGRAMMING
+  DEV
+  DESIGN
+  TECHNICAL
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  REJECTED
+  SELECTED
+}
+
+enum RoundType {
+  MCQ
+  OFFLINE
+}
+
+enum SubmissionStatus {
+  NOT_STARTED
+  STARTED
+  SUBMITTED
+  EVALUATED
+}
+
+////////////////////
+// AUTH
+////////////////////
+
+model User {
+  id       String  @id @default(cuid())
+  name     String?
+  email    String  @unique
+  password String?
+  role     Role    @default(USER)
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+////////////////////
+// APPLICATION
+////////////////////
+
+model Application {
+  id String @id @default(cuid())
+
+  userId String
+  domain Domain
+
+  status ApplicationStatus @default(DRAFT)
+
+  user        User         @relation(fields: [userId], references: [id])
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, domain]) // user can apply once per domain
+}
+
+////////////////////
+// ROUNDS
+////////////////////
+
+model Round {
+  id String @id @default(cuid())
+
+  domain Domain
+  type   RoundType
+  title  String
+
+  isActive Boolean @default(false)
+
+  cutoff   Float?
+  maxScore Float?
+
+  submissions Submission[]
+  questions   Question[]
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////
+// MCQ QUESTIONS
+////////////////////
+
+model Question {
+  id      String @id @default(cuid())
+  roundId String
+
+  question String
+  options  Json
+  answer   String
+  marks    Float
+
+  round Round @relation(fields: [roundId], references: [id])
+}
+
+////////////////////
+// SUBMISSIONS
+////////////////////
+
+model Submission {
+  id String @id @default(cuid())
+
+  applicationId String
+  roundId       String
+
+  status SubmissionStatus @default(NOT_STARTED)
+
+  score     Float?
+  responses Json?
+
+  application Application @relation(fields: [applicationId], references: [id])
+  round       Round       @relation(fields: [roundId], references: [id])
+
+  evaluatedBy String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([applicationId, roundId])
+}
